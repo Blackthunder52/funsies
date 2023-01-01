@@ -1,0 +1,56 @@
+import spotipy
+import spotipy.util as util
+
+def get_user_playlists(username, access_token):
+  sp = spotipy.Spotify(auth=access_token)
+  playlists = sp.user_playlists(username)
+  return playlists
+
+def get_playlist_tracks(username, playlist_id, access_token):
+  sp = spotipy.Spotify(auth=access_token)
+  tracks = sp.user_playlist_tracks(username, playlist_id)
+  return tracks
+
+def create_playlist(username, playlist_name, access_token):
+  sp = spotipy.Spotify(auth=access_token)
+  playlist = sp.user_playlist_create(username, playlist_name)
+  return playlist
+
+def add_tracks_to_playlist(username, playlist_id, tracks, access_token):
+  sp = spotipy.Spotify(auth=access_token)
+  sp.user_playlist_add_tracks(username, playlist_id, tracks)
+
+def remove_tracks_from_playlist(username, playlist_id, tracks, access_token):
+  sp = spotipy.Spotify(auth=access_token)
+  sp.user_playlist_remove_all_occurrences_of_tracks(username, playlist_id, tracks)
+
+def main():
+  # get the user's authorization
+  username = 'YOUR_USERNAME'
+  scope = 'playlist-modify-public'
+  client_id = 'YOUR_CLIENT_ID'
+  client_secret = 'YOUR_CLIENT_SECRET'
+  redirect_uri = 'http://localhost:8000/callback'
+  token = util.prompt_for_user_token(username, scope, client_id, client_secret, redirect_uri)
+
+  # get the user's playlists
+  playlists = get_user_playlists(username, token)
+  for playlist in playlists['items']:
+    print(playlist['name'])
+
+  # get the tracks in a playlist
+  tracks = get_playlist_tracks(username, 'PLAYLIST_ID', token)
+  for track in tracks['items']:
+    print(track['track']['name'])
+
+  # create a new playlist
+  playlist = create_playlist(username, 'My New Playlist', token)
+  print(playlist['id'])
+
+  # add tracks to a playlist
+  tracks_to_add = ['spotify:track:4iV5W9uYEdYUVa79Axb7Rh', 'spotify:track:1301WleyT98MSxVHPZCA6M']
+  add_tracks_to_playlist(username, 'PLAYLIST_ID', tracks_to_add, token)
+
+  # remove tracks from a playlist
+  tracks_to_remove = ['spotify:track:4iV5W9uYEdYUVa79Axb7Rh', 'spotify:track:1301WleyT98MSxVHPZCA6M']
+  remove_tracks_from_playlist(username, 'PLAYLIST_ID', tracks_to_remove, token)
